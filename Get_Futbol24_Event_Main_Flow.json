@@ -1,0 +1,168 @@
+{
+  "name": "Get Futbol24 Event - Main Flow",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "id": "a37caeff-eb0d-44bf-a101-01b69a7e5b77",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -544,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Format date as yyyyMMdd\nconst formatDate = (date) => {\n  const year = date.getFullYear();\n  const month = String(date.getMonth() + 1).padStart(2, '0');\n  const day = String(date.getDate()).padStart(2, '0');\n  return `${year}${month}${day}`;\n};\n\n// Get today's date\nconst today = new Date();\n\n// Build URL array\nconst urls = [];\n\n// Generate URLs for the next 14 days\nfor (let i = 0; i < 14; i++) {\n  const date = new Date(today);\n  date.setDate(today.getDate() + i);\n  urls.push('https://www.futbol24.com/matchDayXml/?Day=' + formatDate(date));\n}\n\n// Add live now URL\nurls.push('https://p.futbol24.com/f24/u/liveNow_15.xml');\n\n// Return URLs for n8n\nreturn urls.map(url => ({ json: { url } }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -368,
+        496
+      ],
+      "id": "eb5a3f6e-9334-49f1-b704-86ca5c5228f5",
+      "name": "Get Web Url"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -176,
+        496
+      ],
+      "id": "3c4bbada-ffe6-487a-afb5-de1667f06b0c",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "YLm7F5hPwJNsk7EO",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/YLm7F5hPwJNsk7EO",
+          "cachedResultName": "Soccer Event Check - Get Event Flow"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "url": "={{ $json.url }}"
+          },
+          "matchingColumns": [
+            "day"
+          ],
+          "schema": [
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        48,
+        512
+      ],
+      "id": "4fbf10c4-31b6-470a-b09f-b6740fa8bef2",
+      "name": "Execute Workflow - Get Event"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Web Url",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Web Url": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Execute Workflow - Get Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Workflow - Get Event": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e7581d95-ed41-4b04-b875-10e32f09ca04",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "98bfed1c0f22fa9e07d0e38dc58da94b0281d63095bd4ba14894d42a90a063e3"
+  },
+  "id": "5fNLufVDsFgDWGt1",
+  "tags": [
+    {
+      "name": "Soccer Event",
+      "id": "c59T6Q5aNg3hXshQ",
+      "createdAt": "2025-10-22T14:39:41.914Z",
+      "updatedAt": "2025-10-22T14:39:41.914Z"
+    },
+    {
+      "createdAt": "2025-10-16T13:37:44.342Z",
+      "updatedAt": "2025-10-16T13:37:44.342Z",
+      "id": "eCqNi5YNjJc2sg4m",
+      "name": "futbol24"
+    }
+  ]
+}
